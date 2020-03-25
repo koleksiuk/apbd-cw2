@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Xml.Serialization;
 
 namespace cw2
 {
@@ -57,18 +58,12 @@ namespace cw2
                         }
                         else
                         {
-                            // log to error log
-                            Console.WriteLine($"Invalid record: {st}");
-
                             WriteToErrorFile(errorLog, line);
                         }
 
                     }
                     else
                     {
-                        // log to error log
-                        Console.WriteLine($"Student already exists: {st}");
-
                         WriteToErrorFile(errorLog, line);
                     }
                     
@@ -77,12 +72,15 @@ namespace cw2
 
             errorLog.Close();
 
-            foreach(KeyValuePair<int, Student> entry in students)
-            {
-                var number = entry.Key;
-                var student = entry.Value;
-                Console.WriteLine($"{number}: {student.FirstName}");
-            }
+
+            University uni = new University(students.Values.ToList());
+            uni.Author = "Konrad Oleksiuk";
+            uni.CreatedAt = DateTime.Now.ToString("dd.MM.yyyy");
+
+            FileStream writer = new FileStream(outputFile, FileMode.Create);
+            XmlSerializer serializer = new XmlSerializer(typeof(University));
+            serializer.Serialize(writer, uni);
+            writer.Close();
         }
 
         static void WriteToErrorFile(StreamWriter sw, string line)

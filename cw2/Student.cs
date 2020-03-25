@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Xml.Serialization;
+
 namespace cw2
 {
     public class StudentValidator
@@ -22,18 +24,71 @@ namespace cw2
         }
     }
 
+    [Serializable]
+    public struct Studies
+    {
+        [XmlElement("name")]
+        public string Course { get; set; }
+
+        [XmlElement("mode")]
+        public string TypeOfCourse { get; set; }
+    }
+
+    [Serializable]
+    [XmlType(TypeName = "student")]
     public struct Student
     {
+        [XmlElement("fname")]
         public string FirstName { get; set; }
+
+        [XmlElement("lname")]
         public string LastName { get; set; }
-        public string Course { get; set; }
-        public string TypeOfCourse { get; set; }
+
+        [XmlElement("studies")]
+        public Studies Studies;
+
+        [XmlAttribute("indexNumber")]
         public int Number { get; set; }
+
+        [XmlIgnore]
+        public String Course
+        {
+            set
+            {
+                Studies.Course = value;
+            }
+            get
+            {
+                return Studies.Course;
+            }
+        }
+
+        [XmlIgnore]
+        public String TypeOfCourse
+        {
+            set
+            {
+                Studies.TypeOfCourse = value;
+            }
+            get
+            {
+                return Studies.TypeOfCourse;
+            }
+        }
+
+        [XmlIgnore]
         public DateTime Birthdate { get; set; }
+
+        [XmlElement("email")]
         public string Email { get; set; }
+
+        [XmlElement("fathersName")]
         public string FatherName { get; set; }
+
+        [XmlElement("mothersName")]
         public string MotherName { get; set; }
 
+        [XmlElement("birthdate")]
         public String BirthdateString
         {
             set
@@ -45,6 +100,10 @@ namespace cw2
                 catch (FormatException)
                 {
                 }
+            }
+            get
+            {
+                return this.Birthdate.ToString("dd.MM.yyyy");
             }
         }
 
