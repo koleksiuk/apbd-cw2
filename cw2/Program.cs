@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text;
 
 namespace cw2
 {
@@ -8,17 +10,24 @@ namespace cw2
     {
         static void Main(string[] args)
         {
-            var sourceFile = args[0];
-            var outputFile = args[1];
-            var format = args[2];
+            // default arguments using Linq ElementAtOrDefault
+            var maybeSourceFile = args.ElementAtOrDefault(0);
+            var sourceFile = String.IsNullOrEmpty(maybeSourceFile) ? "dane.csv" : maybeSourceFile.ToString();
+
+            var maybeOutputFile = args.ElementAtOrDefault(1);
+            var outputFile = String.IsNullOrEmpty(maybeOutputFile) ? "result.xml" : maybeOutputFile.ToString();
+
+            var maybeFormat = args.ElementAtOrDefault(2);
+            var format = String.IsNullOrEmpty(maybeFormat) ? "xml" : maybeFormat.ToString();
 
             Console.WriteLine($"Source File: {sourceFile}, output file: {outputFile}, format: {format}");
 
             if (!File.Exists(sourceFile))
             {
-                Console.WriteLine("File does not exist");
-                return;
+                throw new System.IO.FileNotFoundException($"File {sourceFile} was not found");
             }
+
+            StreamWriter errorLog = new StreamWriter("/Users/konole/Downloads/log.csv");
 
             Dictionary<int, Student> students = new Dictionary<int, Student>();
 
@@ -45,21 +54,28 @@ namespace cw2
                         if (st.IsValid())
                         {
                             students.Add(st.Number, st);
-                        } else
+                        }
+                        else
                         {
                             // log to error log
                             Console.WriteLine($"Invalid record: {st}");
+
+                            WriteToErrorFile(errorLog, line);
                         }
-                        
+
                     }
                     else
                     {
                         // log to error log
                         Console.WriteLine($"Student already exists: {st}");
+
+                        WriteToErrorFile(errorLog, line);
                     }
                     
                 }
             }
+
+            errorLog.Close();
 
             foreach(KeyValuePair<int, Student> entry in students)
             {
@@ -67,6 +83,11 @@ namespace cw2
                 var student = entry.Value;
                 Console.WriteLine($"{number}: {student.FirstName}");
             }
+        }
+
+        static void WriteToErrorFile(StreamWriter sw, string line)
+        {
+            sw.WriteLine(line);           
         }
     }
 }
