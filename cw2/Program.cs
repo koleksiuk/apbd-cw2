@@ -17,31 +17,56 @@ namespace cw2
             if (!File.Exists(sourceFile))
             {
                 Console.WriteLine("File does not exist");
+                return;
             }
 
-            List<Student> students = new List<Student>();
-
-            var file = File.Open(sourceFile, FileMode.Open);
+            Dictionary<int, Student> students = new Dictionary<int, Student>();
 
             using (var stream = new StreamReader(File.OpenRead(sourceFile)))
             {
                 string line = null;
-                while ((line = stream.ReadLine()) != null)
+                while ((line = stream.ReadLine()) != null && line != "")
                 {
-                    string[] student = line.Split(','); var st = new Student
-                    {
-                        firstName = student[0],
-                        lastName = student[1]
+                    string[] studentData = line.Split(',');
+                    var st = new Student {
+                        FirstName = studentData[0],
+                        LastName = studentData[1],
+                        Course = studentData[2],
+                        TypeOfCourse = studentData[3],
+                        Number = int.Parse(studentData[4]),
+                        BirthdateString = studentData[5],
+                        Email = studentData[6],
+                        MotherName = studentData[7],
+                        FatherName = studentData[8]                      
                     };
+
+                    if (!students.ContainsKey(st.Number))
+                    {
+                        if (st.IsValid())
+                        {
+                            students.Add(st.Number, st);
+                        } else
+                        {
+                            // log to error log
+                            Console.WriteLine($"Invalid record: {st}");
+                        }
+                        
+                    }
+                    else
+                    {
+                        // log to error log
+                        Console.WriteLine($"Student already exists: {st}");
+                    }
+                    
                 }
             }
 
-            Console.WriteLine($"{students}");
-        }
-
-        private static Exception FileNotFoundException(string v)
-        {
-            throw new NotImplementedException();
+            foreach(KeyValuePair<int, Student> entry in students)
+            {
+                var number = entry.Key;
+                var student = entry.Value;
+                Console.WriteLine($"{number}: {student.FirstName}");
+            }
         }
     }
 }
