@@ -28,7 +28,7 @@ namespace cw2
                 throw new System.IO.FileNotFoundException($"File {sourceFile} was not found");
             }
 
-            StreamWriter errorLog = new StreamWriter("/Users/konole/Downloads/log.csv");
+            var errorLog = new StreamWriter("/Users/konole/Downloads/log.csv");
 
             Dictionary<int, Student> students = new Dictionary<int, Student>();
 
@@ -38,7 +38,8 @@ namespace cw2
                 while ((line = stream.ReadLine()) != null && line != "")
                 {
                     string[] studentData = line.Split(',');
-                    var st = new Student {
+                    var st = new Student
+                    {
                         FirstName = studentData[0],
                         LastName = studentData[1],
                         Course = studentData[2],
@@ -72,14 +73,24 @@ namespace cw2
 
             errorLog.Close();
 
-
-            University uni = new University(students.Values.ToList());
-            uni.Author = "Konrad Oleksiuk";
-            uni.CreatedAt = DateTime.Now.ToString("dd.MM.yyyy");
+            University university = new University(students.Values.ToList())
+            {
+                Author = "Konrad Oleksiuk",
+                CreatedAt = DateTime.Now.ToString("dd.MM.yyyy")
+            };
 
             FileStream writer = new FileStream(outputFile, FileMode.Create);
-            XmlSerializer serializer = new XmlSerializer(typeof(University));
-            serializer.Serialize(writer, uni);
+
+            switch(format)
+            {
+                case "xml":
+                    XmlSerializer serializer = new XmlSerializer(typeof(University));
+                    serializer.Serialize(writer, university);
+                    break;
+                default:
+                    throw new Exception($"Unknown format: {format}");
+            }
+
             writer.Close();
         }
 
